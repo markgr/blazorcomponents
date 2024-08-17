@@ -1,0 +1,106 @@
+﻿@using System.Globalization
+
+@namespace SampleDatePicker.Components
+
+
+@*<div class="month-year-navigation">
+    <button @onclick="PreviousMonth" class="navigation-button">«</button>
+    <select value="@SelectedMonth" @onchange="OnMonthChange">
+        @foreach (var month in Months)
+        {
+            <option value="@month.Value">@month.Name</option>
+        }
+    </select>
+
+    <select value="@SelectedYear" @onchange="OnYearChange">
+        @foreach (var year in Years)
+        {
+            <option value="@year">@year</option>
+        }
+    </select>
+    <button @onclick="NextMonth" class="navigation-button">»</button>
+</div>*@
+
+<div class="flex items-center justify-center gap-2 mb-2">
+    <button @onclick="PreviousMonth" class="bg-transparent border-none text-2xl cursor-pointer px-2">«</button>
+
+    <select value="@SelectedMonth" @onchange="OnMonthChange" class="px-2 py-1 text-lg border border-gray-300 rounded-md">
+        @foreach (var month in Months)
+        {
+            <option value="@month.Value">@month.Name</option>
+        }
+    </select>
+
+    <select value="@SelectedYear" @onchange="OnYearChange" class="px-2 py-1 text-lg border border-gray-300 rounded-md">
+        @foreach (var year in Years)
+        {
+            <option value="@year">@year</option>
+        }
+    </select>
+
+    <button @onclick="NextMonth" class="bg-transparent border-none text-2xl cursor-pointer px-2">»</button>
+</div>
+
+@code {
+    [Parameter] public EventCallback<int> OnMonthChanged { get; set; }
+    [Parameter] public EventCallback<int> OnYearChanged { get; set; }
+
+    [Parameter] public DateTime CurrentMonth { get; set; }
+    [Parameter] public int CurrentYear { get; set; }
+
+    [Parameter] public int StartYear { get; set; } = 1900;
+    [Parameter] public int EndYear { get; set; } = DateTime.Now.Year;
+
+    private int SelectedMonth
+    {
+        get => CurrentMonth.Month;
+        set => CurrentMonth = new DateTime(CurrentYear, value, 1);
+    }
+
+    private int SelectedYear
+    {
+        get => CurrentYear;
+        set => CurrentYear = value;
+    }
+
+    private IEnumerable<int> Years => Enumerable.Range(StartYear, EndYear - StartYear + 1);
+
+    private IEnumerable<(int Value, string Name)> Months { get; } = Enumerable.Range(1, 12)
+        .Select(i => (Value: i, Name: DateTimeFormatInfo.CurrentInfo.GetMonthName(i)));
+
+    private void OnMonthChange(ChangeEventArgs e)
+    {
+        if (int.TryParse(e.Value.ToString(), out int newMonth))
+        {
+            SelectedMonth = newMonth;
+            OnMonthChanged.InvokeAsync(newMonth);
+        }
+    }
+
+    private void OnYearChange(ChangeEventArgs e)
+    {
+        if (int.TryParse(e.Value.ToString(), out int newYear))
+        {
+            SelectedYear = newYear;
+            OnYearChanged.InvokeAsync(newYear);
+        }
+    }
+
+    private void PreviousMonth()
+    {
+        var newMonth = CurrentMonth.AddMonths(-1);
+        SelectedMonth = newMonth.Month;
+        SelectedYear = newMonth.Year;
+        OnMonthChanged.InvokeAsync(newMonth.Month);
+        OnYearChanged.InvokeAsync(newMonth.Year);
+    }
+
+    private void NextMonth()
+    {
+        var newMonth = CurrentMonth.AddMonths(1);
+        SelectedMonth = newMonth.Month;
+        SelectedYear = newMonth.Year;
+        OnMonthChanged.InvokeAsync(newMonth.Month);
+        OnYearChanged.InvokeAsync(newMonth.Year);
+    }
+}

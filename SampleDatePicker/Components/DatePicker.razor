@@ -1,0 +1,125 @@
+﻿@using System.Globalization
+
+@namespace SampleDatePicker.Components
+
+@inject IJSRuntime JS
+
+@*<div class="date-picker">
+        <InputText @bind-Value="SelectedDateString" @onfocus="ShowCalendar" class="date-input" />
+        <button @onclick="ToggleCalendar" class="calendar-toggle">📅</button>
+
+        @if (IsCalendarVisible)
+        {
+            <div class="calendar-container">
+                <MonthYearNavigation CurrentMonth="CurrentMonth"
+                                     CurrentYear="CurrentYear"
+                                     StartYear="1900"
+                                     EndYear="2100"
+                                     OnMonthChanged="OnMonthChanged"
+                                     OnYearChanged="OnYearChanged" />
+                <Calendar CurrentMonth="CurrentMonth"
+                          CurrentYear="CurrentYear"
+                          OnDateSelected="OnDateSelected" />
+            </div>
+        }
+    </div>*@
+
+<div class="relative inline-block w-96" @onfocusout="HandleFocusOut" @ref="datePickerElement">
+    <InputText @bind-Value="SelectedDateString" @onfocus="ShowCalendar" class="w-full px-3 py-2 text-lg border border-gray-300 rounded-md" />
+    <button @onclick="ToggleCalendar" class="absolute top-1/2 right-3 transform -translate-y-1/2 bg-transparent border-none cursor-pointer text-xl">📅</button>
+
+    @if (IsCalendarVisible)
+    {
+        <div class="absolute left-0 w-full p-3 mt-1 bg-white border border-gray-300 rounded-md shadow-lg z-50">
+            <MonthYearNavigation CurrentMonth="CurrentMonth"
+                                 CurrentYear="CurrentYear"
+                                 StartYear="1900"
+                                 EndYear="2100"
+                                 OnMonthChanged="OnMonthChanged"
+                                 OnYearChanged="OnYearChanged" />
+            <Calendar CurrentMonth="CurrentMonth"
+                      CurrentYear="CurrentYear"
+                      OnDateSelected="OnDateSelected" />
+        </div>
+        }
+        else if(IsPresetVisible)
+        {
+
+        }
+</div>
+
+@code {
+    private ElementReference datePickerElement;
+    private bool IsCalendarVisible { get; set; }
+    private bool IsPresetVisible { get; set; }
+    private DateTime CurrentMonth { get; set; } = DateTime.Now;
+    private int CurrentYear { get; set; } = DateTime.Now.Year;
+
+
+    private DateTime? SelectedDate { get; set; }
+    private string SelectedDateString
+    {
+        get => SelectedDate.HasValue ? SelectedDate.Value.ToString("dd/MM/yyyy", CultureInfo.InvariantCulture) : string.Empty;
+        set
+        {
+            if (DateTime.TryParse(value, out var date))
+            {
+                SelectedDate = date;
+                CurrentMonth = new DateTime(date.Year, date.Month, 1);
+                CurrentYear = date.Year;
+            }
+            else
+            {
+                SelectedDate = null;
+            }
+        }
+    }
+
+    private void HandleBlur(FocusEventArgs e)
+    {
+        IsCalendarVisible = false;
+    }
+
+    private async Task HandleFocusOut(FocusEventArgs e)
+    {
+        // Delay is necessary to allow the click event to be detected
+        await Task.Delay(100);
+        if (JS is not null)
+        {
+            Console.WriteLine($"In HandleFocusOut and datePickerElement = {datePickerElement}");
+            var clickedOutside = await JS.InvokeAsync<bool>("checkIfClickedOutside", datePickerElement );
+            if (clickedOutside)
+            {
+                IsCalendarVisible = false;
+            }
+        }
+    }
+
+    private void ToggleCalendar()
+    {
+        IsCalendarVisible = !IsCalendarVisible;
+    }
+
+    private void ShowCalendar()
+    {
+        IsCalendarVisible = true;
+    }
+
+    private void OnDateSelected(DateTime date)
+    {
+        SelectedDate = date;
+        SelectedDateString = date.ToString("dd/MM/yyyy", CultureInfo.InvariantCulture);
+        IsCalendarVisible = false; // Hide the calendar after selection
+    }
+
+    private void OnMonthChanged(int newMonth)
+    {
+        CurrentMonth = new DateTime(CurrentYear, newMonth, 1);
+    }
+
+    private void OnYearChanged(int newYear)
+    {
+        CurrentYear = newYear;
+        CurrentMonth = new DateTime(newYear, CurrentMonth.Month, 1);
+    }
+}

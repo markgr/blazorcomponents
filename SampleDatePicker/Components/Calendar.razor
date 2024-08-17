@@ -1,0 +1,86 @@
+﻿@namespace SampleDatePicker.Components 
+
+@*<div class="calendar">
+    <div class="calendar-header">
+        @foreach (var day in DaysOfWeek)
+        {
+            <div class="calendar-day-name">@day</div>
+        }
+    </div>
+
+    <div class="calendar-body">
+        @foreach (var day in DaysInMonth)
+        {
+            <div class="calendar-day @GetDayClasses(day)" @onclick="() => SelectDate(day)">
+                @day.Day
+            </div>
+        }
+    </div>
+</div>*@
+
+<div class="grid grid-cols-7 gap-2">
+    @foreach (var day in DaysOfWeek)
+    {
+        <div class="text-center font-semibold">@day</div>
+    }
+
+    @foreach (var day in DaysInMonth)
+    {
+        <div class="text-center p-2 cursor-pointer rounded-md @GetDayClasses(day)"
+             @onclick="() => SelectDate(day.Date)">
+            @day.Day
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter] public DateTime CurrentMonth { get; set; }
+    [Parameter] public int CurrentYear { get; set; }
+    [Parameter] public EventCallback<DateTime> OnDateSelected { get; set; }
+
+    private IEnumerable<DateTime> DaysInMonth { get; set; }
+    private string[] DaysOfWeek { get; } = new[] { "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat" };
+
+    protected override void OnParametersSet()
+    {
+        GenerateCalendarDays();
+    }
+
+    private void GenerateCalendarDays()
+    {
+        var firstDayOfMonth = new DateTime(CurrentYear, CurrentMonth.Month, 1);
+        var daysInMonth = DateTime.DaysInMonth(CurrentYear, CurrentMonth.Month);
+
+        // Find the first day to display on the calendar (including days from the previous month)
+        var firstDayToDisplay = firstDayOfMonth.AddDays(-(int)firstDayOfMonth.DayOfWeek);
+
+        DaysInMonth = Enumerable.Range(0, 42) // 6 weeks, 7 days each
+                                .Select(offset => firstDayToDisplay.AddDays(offset))
+                                .ToList();
+    }
+
+    private string GetDayClasses(DateTime day)
+    {
+        var classes = "";
+
+        if (day.Month != CurrentMonth.Month)
+        {
+            classes += " bg-white text-gray-200";
+        }
+        else if (day.Date == DateTime.Today)
+        {
+            classes += " border-2 border-blue-500 bg-blue-500 text-white";
+        }
+        else
+        {
+            classes += " text-gray-900 hover:bg-gray-200 transition duration-150 ease-in-out";
+        }
+
+        return classes;
+    }
+
+    private void SelectDate(DateTime date)
+    {
+        OnDateSelected.InvokeAsync(date);
+    }
+}
