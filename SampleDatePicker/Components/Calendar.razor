@@ -1,23 +1,5 @@
 ﻿@namespace SampleDatePicker.Components 
 
-@*<div class="calendar">
-    <div class="calendar-header">
-        @foreach (var day in DaysOfWeek)
-        {
-            <div class="calendar-day-name">@day</div>
-        }
-    </div>
-
-    <div class="calendar-body">
-        @foreach (var day in DaysInMonth)
-        {
-            <div class="calendar-day @GetDayClasses(day)" @onclick="() => SelectDate(day)">
-                @day.Day
-            </div>
-        }
-    </div>
-</div>*@
-
 <div class="grid grid-cols-7 gap-2">
     @foreach (var day in DaysOfWeek)
     {
@@ -26,9 +8,8 @@
 
     @foreach (var day in DaysInMonth)
     {
-        <div class="text-center p-2 cursor-pointer rounded-md @GetDayClasses(day)"
-             @onclick="() => SelectDate(day.Date)">
-            @day.Day
+        <div>             
+            <button @onclick="() => SelectDate(day.Date)" class="text-center rounded-md flex w-full justify-center @GetDayClasses(day)">@day.Day</button>
         </div>
     }
 </div>
@@ -81,6 +62,7 @@
 
     private void SelectDate(DateTime date)
     {
+        Console.WriteLine($"SelectDate did this even get called!! {date.Day} {date.Month} {date.Year}");
         OnDateSelected.InvokeAsync(date);
     }
 }

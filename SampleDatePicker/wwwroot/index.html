@@ -31,7 +31,7 @@
     <script language="javascript">
         window.checkIfClickedOutside = function (element) {
             return new Promise((resolve) => {
-                console.log("element = " + element);
+                console.log("element = " + element.id + " document.activeElement = " + document.activeElement);
                 const isOutside = !element.contains(document.activeElement);
                 resolve(isOutside);
             });

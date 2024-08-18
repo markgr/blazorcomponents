@@ -4,28 +4,8 @@
 
 @inject IJSRuntime JS
 
-@*<div class="date-picker">
-        <InputText @bind-Value="SelectedDateString" @onfocus="ShowCalendar" class="date-input" />
-        <button @onclick="ToggleCalendar" class="calendar-toggle">📅</button>
-
-        @if (IsCalendarVisible)
-        {
-            <div class="calendar-container">
-                <MonthYearNavigation CurrentMonth="CurrentMonth"
-                                     CurrentYear="CurrentYear"
-                                     StartYear="1900"
-                                     EndYear="2100"
-                                     OnMonthChanged="OnMonthChanged"
-                                     OnYearChanged="OnYearChanged" />
-                <Calendar CurrentMonth="CurrentMonth"
-                          CurrentYear="CurrentYear"
-                          OnDateSelected="OnDateSelected" />
-            </div>
-        }
-    </div>*@
-
 <div class="relative inline-block w-96" @onfocusout="HandleFocusOut" @ref="datePickerElement">
-    <InputText @bind-Value="SelectedDateString" @onfocus="ShowCalendar" class="w-full px-3 py-2 text-lg border border-gray-300 rounded-md" />
+    <InputText @bind-Value="SelectedDateString" @onfocus="ShowPreset" class="w-full px-3 py-2 text-lg border border-gray-300 rounded-md" />
     <button @onclick="ToggleCalendar" class="absolute top-1/2 right-3 transform -translate-y-1/2 bg-transparent border-none cursor-pointer text-xl">📅</button>
 
     @if (IsCalendarVisible)
@@ -41,11 +21,27 @@
                       CurrentYear="CurrentYear"
                       OnDateSelected="OnDateSelected" />
         </div>
-        }
-        else if(IsPresetVisible)
-        {
-
-        }
+    }
+    else if(IsPresetVisible)
+    {
+        <div class="absolute left-0 w-full p-3 mt-1 bg-white border border-gray-300 rounded-md shadow-lg z-50 min-h-48">
+                <!-- List of Selectable Strings -->
+            <div>
+                @foreach (var item in SelectableStrings)
+                {
+                    <div class="cursor-pointer hover:bg-gray-100 p-2" @onclick="() => SelectString(item)">
+                        @item
+                    </div>
+                }
+            </div>
+            <!-- Divider -->
+                <div class="border-t border-gray-300 my-2"></div>
+            <!-- Calendar Icon Row -->
+            <div class="flex justify-end cursor-pointer hover:bg-gray-100 p-2 w-full" @onclick="() => SelectCalendarIcon()">
+                📅
+            </div>
+        </div>
+    }
 </div>
 
 @code {
@@ -54,12 +50,14 @@
     private bool IsPresetVisible { get; set; }
     private DateTime CurrentMonth { get; set; } = DateTime.Now;
     private int CurrentYear { get; set; } = DateTime.Now.Year;
+     private List<string> SelectableStrings = new List<string> { "Option 1", "Option 2", "Option 3", "Option 4", "Option 5" };
 
 
     private DateTime? SelectedDate { get; set; }
+    private string SelectedStringFromPreset {get;set;}
     private string SelectedDateString
     {
-        get => SelectedDate.HasValue ? SelectedDate.Value.ToString("dd/MM/yyyy", CultureInfo.InvariantCulture) : string.Empty;
+        get => SelectedDate.HasValue ? SelectedDate.Value.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture) : string.Empty;
         set
         {
             if (DateTime.TryParse(value, out var date))
@@ -91,6 +89,7 @@
             if (clickedOutside)
             {
                 IsCalendarVisible = false;
+                IsPresetVisible = false;
             }
         }
     }
@@ -105,10 +104,18 @@
         IsCalendarVisible = true;
     }
 
+    private void ShowPreset()
+    {
+        IsPresetVisible = true;
+    }
+
     private void OnDateSelected(DateTime date)
     {
+        Console.WriteLine($"OnDateSelected has been called with {date.Day} {date.Month} {date.Year}");
         SelectedDate = date;
-        SelectedDateString = date.ToString("dd/MM/yyyy", CultureInfo.InvariantCulture);
+        SelectedDateString = date.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
+        Console.WriteLine($"SelectedDateString has been called with {SelectedDateString}");
+        SelectedStringFromPreset = string.Empty;
         IsCalendarVisible = false; // Hide the calendar after selection
     }
 
@@ -121,5 +128,18 @@
     {
         CurrentYear = newYear;
         CurrentMonth = new DateTime(newYear, CurrentMonth.Month, 1);
+    }
+
+    private void SelectString(string selectedString)
+    {
+        SelectedDateString = selectedString;
+        SelectedStringFromPreset = selectedString;
+        IsPresetVisible = false;
+    }
+
+    private void SelectCalendarIcon()
+    {
+        // Handle calendar icon selection
+        IsPresetVisible = false;
     }
 }
