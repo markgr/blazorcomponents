@@ -2,25 +2,6 @@
 
 @namespace SampleDatePicker.Components
 
-
-@*<div class="month-year-navigation">
-    <button @onclick="PreviousMonth" class="navigation-button">«</button>
-    <select value="@SelectedMonth" @onchange="OnMonthChange">
-        @foreach (var month in Months)
-        {
-            <option value="@month.Value">@month.Name</option>
-        }
-    </select>
-
-    <select value="@SelectedYear" @onchange="OnYearChange">
-        @foreach (var year in Years)
-        {
-            <option value="@year">@year</option>
-        }
-    </select>
-    <button @onclick="NextMonth" class="navigation-button">»</button>
-</div>*@
-
 <div class="flex items-center justify-center gap-2 mb-2">
     <button @onclick="PreviousMonth" class="bg-transparent border-none text-2xl cursor-pointer px-2">«</button>
 

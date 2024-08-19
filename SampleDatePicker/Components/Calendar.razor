@@ -17,6 +17,8 @@
 @code {
     [Parameter] public DateTime CurrentMonth { get; set; }
     [Parameter] public int CurrentYear { get; set; }
+
+    [Parameter] public DateTime CurrentDate {get;set;}
     [Parameter] public EventCallback<DateTime> OnDateSelected { get; set; }
 
     private IEnumerable<DateTime> DaysInMonth { get; set; }
@@ -44,7 +46,11 @@
     {
         var classes = "";
 
-        if (day.Month != CurrentMonth.Month)
+        if(day.Date == CurrentDate.Date)
+        {
+            classes += " border-2 border-grey-500 bg-gray-500 text-white";
+        }
+        else if (day.Month != CurrentMonth.Month)
         {
             classes += " bg-white text-gray-200";
         }

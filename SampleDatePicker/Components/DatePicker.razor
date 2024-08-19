@@ -1,4 +1,5 @@
 ﻿@using System.Globalization
+@using System.Linq.Expressions;
 
 @namespace SampleDatePicker.Components
 
@@ -19,6 +20,7 @@
                                  OnYearChanged="OnYearChanged" />
             <Calendar CurrentMonth="CurrentMonth"
                       CurrentYear="CurrentYear"
+                      CurrentDate="SelectedDate ?? DateTime.Now"
                       OnDateSelected="OnDateSelected" />
         </div>
     }
@@ -27,10 +29,10 @@
         <div class="absolute left-0 w-full p-3 mt-1 bg-white border border-gray-300 rounded-md shadow-lg z-50 min-h-48">
                 <!-- List of Selectable Strings -->
             <div>
-                @foreach (var item in SelectableStrings)
+                @foreach (var item in Presets)
                 {
-                    <div class="cursor-pointer hover:bg-gray-100 p-2" @onclick="() => SelectString(item)">
-                        @item
+                    <div class="cursor-pointer hover:bg-gray-100 p-2 transition duration-150 ease-in-out" @onclick="() => SelectPreset(item.PresetFunction)">
+                        <button>@item.Title</button>                        
                     </div>
                 }
             </div>
@@ -38,19 +40,35 @@
                 <div class="border-t border-gray-300 my-2"></div>
             <!-- Calendar Icon Row -->
             <div class="flex justify-end cursor-pointer hover:bg-gray-100 p-2 w-full" @onclick="() => SelectCalendarIcon()">
-                📅
+                <button>📅</button>
             </div>
         </div>
     }
 </div>
 
 @code {
+    [Parameter]
+    public DateTime StartDate {get;set;} = DateTime.Now;
+
     private ElementReference datePickerElement;
     private bool IsCalendarVisible { get; set; }
     private bool IsPresetVisible { get; set; }
     private DateTime CurrentMonth { get; set; } = DateTime.Now;
     private int CurrentYear { get; set; } = DateTime.Now.Year;
-     private List<string> SelectableStrings = new List<string> { "Option 1", "Option 2", "Option 3", "Option 4", "Option 5" };
+    private List<string> SelectableStrings = new List<string> { "Option 1", "Option 2", "Option 3", "Option 4", "Option 5" };
+    private List<DateTimePreset> Presets = new();
+
+    protected override void OnInitialized()
+    {
+        Presets.Add(new DateTimePreset("7 days ago", d => DateTime.Now - TimeSpan.FromDays(7)));
+        Presets.Add(new DateTimePreset("14 days ago", d => DateTime.Now - TimeSpan.FromDays(14)));
+        Presets.Add(new DateTimePreset("1st of month", d => new DateTime(d.Year, d.Month, 1)));
+        Presets.Add(new DateTimePreset("1st of month - no prevalue", d => new DateTime(2024, 8, 1)));
+        if(SelectedDate is null)
+        {
+            SelectedDate = StartDate; 
+        }
+    } 
 
 
     private DateTime? SelectedDate { get; set; }
@@ -137,9 +155,38 @@
         IsPresetVisible = false;
     }
 
-    private void SelectCalendarIcon()
+    private void SelectPreset(Expression<Func<DateTime, DateTime>> PresetFunction)
+    {
+        try
+        {
+
+        var func = PresetFunction.Compile();
+        if(SelectedDate is not null)
+        {
+            Console.WriteLine($"Selected Date = {func(SelectedDate.Value)}");
+            var newDate = (DateTime)func(SelectedDate.Value);
+            Console.WriteLine($"OnDateSelected has been called with {newDate}");
+            SelectedDate = newDate;
+            SelectedDateString = newDate.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
+            
+        }
+        else
+        {
+             Console.WriteLine($"Selected Date is not valid");
+        }
+        IsPresetVisible = false;
+        }
+        catch(Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+        }
+    }
+
+    private async Task SelectCalendarIcon()
     {
         // Handle calendar icon selection
         IsPresetVisible = false;
+        await Task.Delay(100);
+        IsCalendarVisible = true;
     }
 }
