@@ -1,0 +1,58 @@
+ @using System.Linq.Expressions;
+
+ @namespace SampleDatePicker.Components
+
+ <!-- List of Selectable Strings -->
+<div>
+    @if(Presets is not null)
+    {
+        @foreach (var item in Presets)
+        {
+            <div class="cursor-pointer hover:bg-gray-100 p-2 transition duration-150 ease-in-out" @onclick="() => SelectPreset(item.PresetFunction)">
+                <button>@item.Title</button>                        
+            </div>
+        }
+    }
+</div>
+@if (ShowCalendarIcon)
+{
+    <!-- Divider -->
+    <div class="border-t border-gray-300 my-2"></div>
+    <!-- Calendar Icon Row -->
+    <div class="flex justify-end cursor-pointer hover:bg-gray-100 p-2 w-full" @onclick="SelectIcon">
+        <button>📅</button>
+    </div>
+}
+
+@code {
+    [Parameter]
+    public List<DateTimePreset>? Presets {get;set;}
+
+    [Parameter]
+    public EventCallback<DateTime> OnPresetSelected { get; set; }
+
+    [Parameter]
+    public EventCallback OnIconSelected { get; set; }
+
+    [Parameter]
+    public bool ShowCalendarIcon { get; set; }
+
+    
+    private async Task SelectPreset(Expression<Func<DateTime, DateTime>> PresetFunction)
+    {
+        if(OnPresetSelected.HasDelegate)
+        {
+            var func = PresetFunction.Compile();
+            var newDate = (DateTime)func(DateTime.Now);
+            await OnPresetSelected.InvokeAsync(newDate);
+        }
+    }
+
+    private void SelectIcon()
+    {
+        if(OnIconSelected.HasDelegate)
+        {            
+            OnIconSelected.InvokeAsync();
+        }
+    }
+}

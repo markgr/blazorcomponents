@@ -22,7 +22,6 @@
     <None Remove="Styles\" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Components\" />
     <Folder Include="Styles\" />
   </ItemGroup>
 </Project>
