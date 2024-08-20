@@ -3,11 +3,26 @@
 
 <PageTitle>Home</PageTitle>
 
-<h1>Hello, world!</h1>
-
-Welcome to your new app.
-
-<DatePicker PickerMode="@DatePickerMode.PresetThenDate"/>
+<div class="flex flex-col ml-4 mt-4 justify-content-center">
+    <div>Calendar Only Mode</div>
+    <div>
+        <DatePicker PickerMode="@DatePickerMode.OnlyDate" />
+    </div>
+</div>
+<div class="flex flex-col ml-4 mt-4 justify-content-center">
+    <div>Preset Only Mode</div>
+    
+    <div>
+        <DatePicker PickerMode="@DatePickerMode.PresetOnly" />
+    </div>
+</div>
+<div class="flex flex-col ml-4 mt-4 justify-content-center">
+    <div>Preset Then Calendar Mode</div>
+    
+    <div>
+        <DatePicker PickerMode="@DatePickerMode.PresetThenDate" />
+    </div>
+</div>
 
 @code {
     private string Details = DateTime.Now.ToString("dd/MM/yyyyy",CultureInfo.InvariantCulture);

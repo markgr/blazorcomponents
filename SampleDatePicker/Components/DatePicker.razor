@@ -27,7 +27,7 @@
     }
     else if(IsPresetVisible)
     {
-        <div class="absolute left-0 w-full p-3 mt-1 bg-white border border-gray-300 rounded-md shadow-lg z-50 min-h-48">
+        <div class="absolute left-0 w-full p-3 mt-1 bg-white border border-gray-300 rounded-md shadow-lg z-50 min-h-32">
             <PresetList OnPresetSelected="SelectPreset" OnIconSelected="SelectCalendarIcon" Presets="Presets" ShowCalendarIcon="PickerMode == DatePickerMode.PresetOnly ? false : true" />
         </div>
     }
@@ -64,7 +64,7 @@
     protected override void OnParametersSet()
     {
         base.OnParametersSet();
-        if (PickerMode == DatePickerMode.OnlyDate || PickerMode == DatePickerMode.PresetThenDate)
+        if (PickerMode == DatePickerMode.OnlyDate)
         {
             _currentPickerMode = CurrentPickerMode.Calendar;
         }
@@ -126,6 +126,10 @@
         {
             IsPresetVisible = !IsPresetVisible;
         }
+        else
+        {
+            IsCalendarVisible = !IsCalendarVisible;
+        }
     }
 
     private void ShowCurrentPicker()
@@ -134,9 +138,13 @@
         {
             IsCalendarVisible = true;
         }
-        else
+        else if (PickerMode == DatePickerMode.PresetThenDate && _currentPickerMode == CurrentPickerMode.Preset || PickerMode == DatePickerMode.PresetOnly)
         {
             IsPresetVisible = true;
+        }
+        else
+        {
+            IsCalendarVisible = true;
         }
     }
 

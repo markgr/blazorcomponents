@@ -8,8 +8,8 @@
     {
         @foreach (var item in Presets)
         {
-            <div class="cursor-pointer hover:bg-gray-100 p-2 transition duration-150 ease-in-out" @onclick="() => SelectPreset(item.PresetFunction)">
-                <button>@item.Title</button>                        
+            <div class="" @onclick="() => SelectPreset(item.PresetFunction)">
+                <button class="hover:bg-gray-100 w-full text-left transition duration-150 ease-in-out py-2">@item.Title</button>
             </div>
         }
     }
@@ -19,8 +19,8 @@
     <!-- Divider -->
     <div class="border-t border-gray-300 my-2"></div>
     <!-- Calendar Icon Row -->
-    <div class="flex justify-end cursor-pointer hover:bg-gray-100 p-2 w-full" @onclick="SelectIcon">
-        <button>📅</button>
+    <div @onclick="SelectIcon">
+        <button class="flex justify-end cursor-pointer hover:bg-gray-100 p-2 w-full">📅</button>
     </div>
 }
 
@@ -37,9 +37,10 @@
     [Parameter]
     public bool ShowCalendarIcon { get; set; }
 
-    
+
     private async Task SelectPreset(Expression<Func<DateTime, DateTime>> PresetFunction)
     {
+        Console.WriteLine($"Hmmmmm Select Preset called with {PresetFunction}");
         if(OnPresetSelected.HasDelegate)
         {
             var func = PresetFunction.Compile();
